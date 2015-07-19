@@ -1,0 +1,139 @@
+package com.charlesbai.artcrawl;
+
+/**
+ * Created by charlesbai on 15-07-18.
+ */
+
+import android.app.Activity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.ImageButton;
+
+//import com.squareup.picasso.Picasso;
+
+public class PictureList extends ArrayAdapter<String> {
+//    public static final String TAG = "CoDirMainCL";
+    private ImageView mImageView;
+    private ImageButton mImageButton;
+    private TextView mTextView;
+    boolean isLiked;
+    public long firstClick = 0;
+    public long secondClick = 0;
+    public int noOfLikes = 999;
+
+    private final Activity mContext;
+
+//    private final String[] fnames;
+//    private final String[] lnames;
+//    private final String[] cells;
+//    private final String[] thumbs;
+
+    private final int[] artworkIds;
+    private final int[] createDates;
+    private final String[] userIds;
+    private final int[] prices;
+    private final int[] likess;
+    private final double [] geolats;
+    private final double [] geolongs;
+    private final String[] images;
+    private final int[] onSales;
+    private final String[] titles;
+    private final String[] localitys;
+
+    public PictureList(Activity mContext, int[] artworkIds, int[] createDates, String[] userIds, int[] prices, int[] likess,
+                       double[] geolats, double[] geolongs, String[] images, int[] onSales, String[] titles, String[] localitys) {
+
+        super(mContext, R.layout.picture_list_row, userIds);
+
+        this.mContext = mContext;
+
+        this.artworkIds = artworkIds;
+        this.createDates = createDates;
+        this.userIds  = userIds;
+        this.prices = prices;
+        this.likess = likess;
+        this.geolats = geolats;
+        this.geolongs  = geolongs;
+        this.images = images;
+        this.onSales = onSales;
+        this.titles  = titles;
+        this.localitys = localitys;
+    }
+
+    @Override
+    public View getView(int p, View view, ViewGroup parent) {
+        LayoutInflater inflater = mContext.getLayoutInflater();
+        View rowView = inflater.inflate(R.layout.picture_list_row, null, true);
+
+        final ImageView imgThumb = (ImageView) rowView.findViewById(R.id.imgThumb);
+        TextView txtName = (TextView) rowView.findViewById(R.id.txtName);
+        TextView txtCell = (TextView) rowView.findViewById(R.id.txtCell);
+
+        txtName.setText(getFullName(fnames[p], lnames[p]));
+        txtCell.setText(cells[p]);
+        Picasso.with(getContext()).load(thumbs[p]).error(R.drawable.default_user).into(imgThumb);
+
+//        mImageView = (ImageView) findViewById(R.id.image);
+//        mImageButton = (ImageButton) findViewById(R.id.likebutton);
+//        mTextView = (TextView) findViewById(R.id.likeView);
+//        isLiked = false;
+//
+//        mImageView.setOnClickListener(new android.view.View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(android.view.View view) {
+//                // TODO Auto-generated method stub
+//                Date i = new Date();
+//                firstClick = secondClick;
+//                secondClick = i.getTime();
+//
+//
+//                if (secondClick - firstClick <= 500) {
+//                    if (isLiked == false) {
+//                        mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_filled));
+//                        isLiked = true;
+//                    }
+//                }
+//            }
+//        });
+//
+//            // You can set a temporary background here
+//            image.setImageResource(null);
+//
+//             //Start the DownloadImage task with the given url
+//            new DownloadImage().execute("http://wallpaperswa.com/thumbnails/detail/20120415/paintings%20colorful%20leonid%20afremov%20artwork" +
+//                "%201920x1080%20wallpaper_wallpaperswa.com_17.jpg");
+//            }
+
+        return rowView;
+    }
+
+    /**
+     * Capitalize first letters of a name, join and return
+     * @param fname
+     * @param lname
+     * @return
+     */
+    public static String getFullName(String fname, String lname) {
+        return capitalizeFirstLetters(fname + " " + lname);
+    }
+
+    public static String capitalizeFirstLetters(String source) {
+        StringBuffer res = new StringBuffer();
+
+        String[] strArr = source.split(" ");
+        for (String str : strArr) {
+            char[] stringArray = str.trim().toCharArray();
+            stringArray[0] = Character.toUpperCase(stringArray[0]);
+            str = new String(stringArray);
+
+            res.append(str).append(" ");
+        }
+
+        return res.toString().trim();
+    }
+}

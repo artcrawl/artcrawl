@@ -1,0 +1,279 @@
+package com.charlesbai.artcrawl;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ImageButton;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.squareup.picasso.Picasso;
+
+import org.apache.http.Header;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.sql.Timestamp;
+import java.util.Date;
+
+/**
+ * Created by charlesbai on 15-07-19.
+ */
+public class SinglePictureActivity extends ActionBarActivity {
+
+//    public static final String TAG = "CoDirSingleContact";
+
+    private AsyncHttpClient client;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_single_picture);
+
+        Intent intent = getIntent();
+        //String seed = intent.getStringExtra(MainActivity.EXTRA_CONTACT_SEED);
+
+        // Need to reload as we're not storing the JSON
+        // Should be fine if we store the data and/or use Google GSON
+       // Log.i(TAG, "Fetching contact " + seed);
+        client = new AsyncHttpClient();
+        client.get("http://www.hubnest.com/artcrawlbackend/artcrawl.php?cmd=listposts&locality=toronto", new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                // called when response HTTP status is "200 OK"
+                JSONArray results = null;
+                try {
+                    // Parse datas
+                    //JSONObject results = response.getJSONArray("data");
+
+                    JSONObject picture = response.getJSONArray("results").getJSONObject(0).getJSONObject("data");
+
+                    int artworkId  = picture.getInt("artworkid");
+                    int createDate = picture.getInt("createdate");
+                    String userId = picture.getString("userid");
+                    int price = picture.getInt("price");
+                    int likes = picture.getInt("likes");
+                    double geolat = picture.getDouble("geolat");
+                    double geolong = picture.getDouble("geolong");
+                    String image = picture.getString("image");
+                    int onSale = picture.getInt("onsale");
+                    String title = picture.getString("title");
+                    String locality = picture.getString("locality");
+
+//                    String fname      = contact.getJSONObject("name").getString("first");
+//                    String lname      = contact.getJSONObject("name").getString("last");
+//                    String thumb      = contact.getJSONObject("picture").getString("thumbnail");
+//                    // Long dobts     = (Long) contact.getString("dob");
+//                    String loc_street = contact.getJSONObject("location").getString("street");
+//                    String loc_city   = contact.getJSONObject("location").getString("city");
+//                    String loc_state  = contact.getJSONObject("location").getString("state");
+
+//                    final String cell  = contact.getString("cell");
+//                    final String email = contact.getString("email");
+
+//                    String name           = ContactList.getFullName(fname, lname);
+//                    final String location = ContactList.capitalizeFirstLetters(loc_street) + "\n" +
+//                            ContactList.capitalizeFirstLetters(loc_city) + "\n" +
+//                            ContactList.capitalizeFirstLetters(loc_state);
+
+                    // Convert timestamp to date
+                    /* Timestamp stamp = new Timestamp(dob);
+                    Date date = new Date(stamp.getTime());
+                    System.out.println(date); */
+
+                    // Change activity title
+                    //setTitle(name);
+
+                    // Find by views
+//                    RelativeLayout phoneC = (RelativeLayout) findViewById(R.id.rlContainer);
+//                    RelativeLayout emailC = (RelativeLayout) findViewById(R.id.emailContainer);
+//                    RelativeLayout locC   = (RelativeLayout) findViewById(R.id.locationContainer);
+//
+//                    ImageView imgThumb   = (ImageView) findViewById(R.id.imgThumb);
+//                    TextView txtName     = (TextView) findViewById(R.id.txtName);
+//                    TextView txtCell     = (TextView) findViewById(R.id.txtCell);
+//                    TextView txtEmail    = (TextView) findViewById(R.id.txtEmail);
+//                    TextView txtLocation = (TextView) findViewById(R.id.txtLocation);
+
+                    ImageView mImageView = (ImageView) findViewById(R.id.image);
+                    ImageButton mImageButton = (ImageButton) findViewById(R.id.likebutton);
+                    TextView mTextView = (TextView) findViewById(R.id.likeView);
+                    boolean isLiked = false;
+
+                    // Load data into the fields
+//                    Picasso.with(getApplicationContext()).load(thumb).error(R.drawable.default_user).into(imgThumb);
+//                    txtName.setText(name);
+//                    txtCell.setText(cell);
+//                    txtEmail.setText(email);
+//                    txtLocation.setText(location);
+
+                    /* Set onClick listeners for actions */
+
+                    // You can set a temporary background here
+                    //image.setImageResource(null);
+
+                    // Start the DownloadImage task with the given url
+                  new DownloadImage().execute(image);
+
+                    // Call for cell
+                    phoneC.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                            callIntent.setData(Uri.parse("tel:"+cell));
+                            startActivity(Intent.createChooser(callIntent, getString(R.string.intent_call)));
+                        }
+                    });
+
+                    // Email for email
+                    emailC.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                            emailIntent.setData(Uri.fromParts("mailto", email, null));
+                            if (emailIntent.resolveActivity(getPackageManager()) != null)
+                                startActivity(Intent.createChooser(emailIntent, getString(R.string.intent_email)));
+                        }
+                    });
+
+                    // Maps for location
+                    locC.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            Intent mapsIntent = new Intent(Intent.ACTION_VIEW);
+                            mapsIntent.setData(Uri.parse("geo:0,0?q="+location));
+                            if (mapsIntent.resolveActivity(getPackageManager()) != null)
+                                startActivity(Intent.createChooser(mapsIntent, getString(R.string.intent_map)));
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed to parse JSON. " + e.toString());
+                    failedLoadingContact();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                Log.e(TAG, "Failed to load user. " + throwable.toString());
+                failedLoadingContact();
+            }
+
+        });
+    }
+
+    private void failedLoadingContact() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(SingleContactActivity.this, "Failed to load contact.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_single_contact, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setImage(Drawable drawable) {
+        mImageView.setBackgroundDrawable(drawable);
+    }
+
+    public class DownloadImage extends AsyncTask<String, Integer, Drawable> {
+
+        @Override
+        protected Drawable doInBackground(String... arg0) {
+            // This is done in a background thread
+            return downloadImage(arg0[0]);
+        }
+
+        /**
+         * Called after the image has been downloaded
+         * -> this calls a function on the main thread again
+         */
+        protected void onPostExecute(Drawable image) {
+            setImage(image);
+        }
+
+
+        /**
+         * Actually download the Image from the _url
+         *
+         * @param _url
+         * @return
+         */
+        private Drawable downloadImage(String _url) {
+            //Prepare to download image
+            URL url;
+            BufferedOutputStream out;
+            InputStream in;
+            BufferedInputStream buf;
+
+            //BufferedInputStream buf;
+            try {
+                url = new URL(_url);
+                in = url.openStream();
+
+            /*
+             * THIS IS NOT NEEDED
+             *
+             * YOU TRY TO CREATE AN ACTUAL IMAGE HERE, BY WRITING
+             * TO A NEW FILE
+             * YOU ONLY NEED TO READ THE INPUTSTREAM
+             * AND CONVERT THAT TO A BITMAP
+            out = new BufferedOutputStream(new FileOutputStream("testImage.jpg"));
+            int i;
+
+             while ((i = in.read()) != -1) {
+                 out.write(i);
+             }
+             out.close();
+             in.close();
+             */
+
+                // Read the inputstream
+                buf = new BufferedInputStream(in);
+
+                // Convert the BufferedInputStream to a Bitmap
+                Bitmap bMap = BitmapFactory.decodeStream(buf);
+                if (in != null) {
+                    in.close();
+                }
+                if (buf != null) {
+                    buf.close();
+                }
+
+                return new BitmapDrawable(bMap);
+
+            } catch (Exception e) {
+                Log.e("Error reading file", e.toString());
+            }
+
+            return null;
+        }
+
+    }
+}
